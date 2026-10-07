@@ -333,16 +333,16 @@ if (window.ethereum) {
       let e = await ethereum.request({ method: "eth_accounts" });
       e.length > 0 && ((account = e[0]), updateUIConnected(), await initializeContracts());
   } catch (t) {
-      console.error("Error initializing Web3:", t), alert("Failed to initialize Web3. Please ensure MetaMask is connected.");
+      console.error("Error initializing Web3:", t), notify("Failed to initialize Web3. Please ensure MetaMask is connected.", "error");
   }
-} else alert("Please install MetaMask or another Web3 wallet.");
+} else notify("No wallet found. Install MetaMask or another Web3 wallet to use Shiller.", "info");
 }
 async function initializeContracts() {
 let e = networks[selectedNetwork];
 try {
   (shillerContract = new web3.eth.Contract(ShillerABI, e.shiller)), (usdcContract = new web3.eth.Contract(ERC20_ABI, e.usdc)), await loadCampaigns(), await loadLeaderboard(),await displayUserCampaigns(); ;
 } catch (t) {
-  console.error("Error initializing contracts:", t), alert("Failed to initialize contracts. Check contract addresses and network.");
+  console.error("Error initializing contracts:", t), notify("Failed to initialize contracts. Check contract addresses and network.", "error");
 }
 }
 function setupEventListeners() {
@@ -368,7 +368,7 @@ async function connectWallet() {
     await displayUserCampaigns(); // Show user's campaign IDs after connecting
   } catch (error) {
     console.error('Error connecting wallet:', error);
-    alert('Failed to connect wallet.');
+    notify('Failed to connect wallet.', "error");
   }
 }
 
@@ -413,9 +413,9 @@ try {
       try {
           await ethereum.request({ method: "wallet_addEthereumChain", params: [{ chainId: e.chainId, chainName: e.name, rpcUrls: [e.rpc] }] }), await initializeContracts();
       } catch (a) {
-          console.error("Error adding network:", a), alert("Failed to add network.");
+          console.error("Error adding network:", a), notify("Failed to add network.", "error");
       }
-  else console.error("Error switching network:", t), alert("Failed to switch network.");
+  else console.error("Error switching network:", t), notify("Failed to switch network.", "error");
 }
 }
 function updateUIConnected() {
@@ -425,11 +425,11 @@ async function handleFileUpload(e) {
 let t = e.target.files[0];
 if (!t) return;
 if (!t.type.startsWith("image/")) {
-  alert("Please upload an image file."), (e.target.value = "");
+  notify("Please upload an image file.", "error"), (e.target.value = "");
   return;
 }
 if (t.size > 5242880) {
-  alert("File size exceeds 5MB."), (e.target.value = "");
+  notify("File size exceeds 5MB.", "error"), (e.target.value = "");
   return;
 }
 let a = new FileReader();
@@ -458,7 +458,7 @@ let e = document.getElementById("taskList"),
   a = document.createElement("div");
 (a.className = "task-entry"),
   (a.innerHTML = `
-<select class="taskType">
+<select class="taskType" aria-label="Task type">
 <option value="0">Follow</option>
 <option value="1">Share (Retweet)</option>
 <option value="2">Like</option>
@@ -467,8 +467,8 @@ let e = document.getElementById("taskList"),
 <option value="5">Quote</option>
 <option value="6">Tag Friends</option>
 </select>
-<input class="taskTarget" placeholder="Target (e.g., @user or Tweet link)" type="text">
-<button class="removeTask">Remove</button>
+<input class="taskTarget" placeholder="Target (e.g., @user or Tweet link)" type="text" aria-label="Task target">
+<button class="removeTask" type="button">Remove</button>
 <span class="taskCost">${t < 3 ? "Included" : "$1 USDC"}</span>
 `),
   e.appendChild(a),
@@ -480,7 +480,7 @@ let t = document.createElement("div");
   (t.innerHTML = `
 <div class="modal-content">
     <h3>Error</h3>
-    <p>${e}</p>
+    <p>${esc(e)}</p>
     <button class="close-modal">OK</button>
 </div>
 `),
@@ -493,7 +493,7 @@ let t = document.createElement("div");
   (t.innerHTML = `
 <div class="modal-content">
     <h3>Success</h3>
-    <p>${e}</p>
+    <p>${esc(e)}</p>
     <button class="close-modal">OK</button>
 </div>
 `),
@@ -577,10 +577,10 @@ try {
           let d = r.description.length > 100 ? r.description.substring(0, 97) + "..." : r.description,
               c = r.mediaURI.startsWith("http") ? r.mediaURI : `https://black-electoral-dormouse-46.mypinata.cloud/ipfs/${r.mediaURI}`;
           (p.innerHTML = `
-    <h3>${r.projectName}</h3>
-    ${r.mediaURI ? `<img src="${c}" alt="${r.projectName}" />` : ""}
-    <p>${d}</p>
-    <p>Rewards: ${r.rewardDetails}</p>
+    <h3>${esc(r.projectName)}</h3>
+    ${r.mediaURI ? `<img src="${esc(safeUrl(c))}" alt="" loading="lazy" />` : ""}
+    <p>${esc(d)}</p>
+    <p>Rewards: ${esc(r.rewardDetails)}</p>
   `),
               p.addEventListener("click", () => showCampaignModal(i, r, s)),
               e.appendChild(p);
@@ -638,14 +638,14 @@ try {
           (s.className = "proof-entry"),
               (s.innerHTML = `
     <p>Participant: ${account.slice(0, 6)}...${account.slice(-4)}</p>
-    <p>Task ${i}: <a href="${r.proofUrl}" target="_blank" style="color: #00FFFF;">${r.proofUrl}</a></p>
+    <p>Task ${i}: <a href="${esc(safeUrl(r.proofUrl))}" target="_blank" rel="noopener noreferrer">${esc(r.proofUrl)}</a></p>
     <p>Status: ${r.approved ? "Approved" : "Pending"}</p>
-    ${r.approved ? "" : `<input type="checkbox" class="approveProof" data-participant="${account}" data-task="${i}"> Approve`}
+    ${r.approved ? "" : `<label><input type="checkbox" class="approveProof" data-participant="${account}" data-task="${i}"> Approve</label>`}
   `),
               t.appendChild(s);
       }
   }
-  let o = await shillerContract.methods.getParticipants(e).call();
+  let o = await getCampaignParticipants(e, a.startTime);
   for (let l of (console.log("Participants found:", o), o))
       if (l.toLowerCase() !== account.toLowerCase())
           for (let p = 0; p < a.taskCount; p++) {
@@ -656,9 +656,9 @@ try {
                   (c.className = "proof-entry"),
                       (c.innerHTML = `
       <p>Participant: ${l.slice(0, 6)}...${l.slice(-4)}</p>
-      <p>Task ${p}: <a href="${d.proofUrl}" target="_blank" style="color: #00FFFF;">${d.proofUrl}</a></p>
+      <p>Task ${p}: <a href="${esc(safeUrl(d.proofUrl))}" target="_blank" rel="noopener noreferrer">${esc(d.proofUrl)}</a></p>
       <p>Status: ${d.approved ? "Approved" : "Pending"}</p>
-      ${d.approved ? "" : `<input type="checkbox" class="approveProof" data-participant="${l}" data-task="${p}"> Approve`}
+      ${d.approved ? "" : `<label><input type="checkbox" class="approveProof" data-participant="${l}" data-task="${p}"> Approve</label>`}
     `),
                       t.appendChild(c);
               }
@@ -732,7 +732,7 @@ try {
           let a = document.createElement("div");
           (a.className = "leaderboard-entry"),
               (a.style.cursor = "pointer"),
-              (a.innerHTML = `<p>Campaign ${t.campaignId}: ${t.projectName} - ${t.approvedTasks} approved tasks</p>`),
+              (a.innerHTML = `<p>Campaign ${t.campaignId}: ${esc(t.projectName)} - ${t.approvedTasks} approved tasks</p>`),
               a.addEventListener("click", () => showCampaignModal(t.campaignId, t.campaignData, t.tasks)),
               e.appendChild(a);
       }),
@@ -776,9 +776,9 @@ try {
       (t.className = "campaign-card"), (t.style.cursor = "pointer");
       let a = e.mediaURI.startsWith("http") ? e.mediaURI : `https://black-electoral-dormouse-46.mypinata.cloud/ipfs/${e.mediaURI}`;
       (t.innerHTML = `
-  <h3>${e.projectName}</h3>
-  ${e.mediaURI ? `<img src="${a}" alt="${e.projectName}" />` : ""}
-  <p>Rewards: ${e.rewardDetails}</p>
+  <h3>${esc(e.projectName)}</h3>
+  ${e.mediaURI ? `<img src="${esc(safeUrl(a))}" alt="" loading="lazy" />` : ""}
+  <p>Rewards: ${esc(e.rewardDetails)}</p>
 `),
           t.addEventListener("click", () => showCampaignModal(e.id, e, e.tasks)),
           i.appendChild(t);
@@ -800,14 +800,14 @@ let i = await Promise.all(
           }
       })
   ),
-  r = (e) => (/^(https?:\/\/[^\s]+)/.test(e) ? `<a href="${e}" target="_blank" style="color: #00FFFF; text-decoration: underline;">${e}</a>` : e),
+  r = (e) => (/^https?:\/\/[^\s]+$/i.test(e) ? `<a href="${esc(e)}" target="_blank" rel="noopener noreferrer">${esc(e)}</a>` : esc(e)),
   s = t.mediaURI.startsWith("http") ? t.mediaURI : `https://black-electoral-dormouse-46.mypinata.cloud/ipfs/${t.mediaURI}`;
 (n.innerHTML = `
 <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
-<h2>${t.projectName}</h2>
-<p>${t.description}</p>
-${t.mediaURI ? `<img src="${s}" alt="${t.projectName}" style="max-height: 200px; display: block; margin: 10px auto;" />` : ""}
-<p>Rewards: ${t.rewardDetails}</p>
+<h2>${esc(t.projectName)}</h2>
+<p>${esc(t.description)}</p>
+${t.mediaURI ? `<img src="${esc(safeUrl(s))}" alt="" style="max-height: 200px; display: block; margin: 10px auto;" />` : ""}
+<p>Rewards: ${esc(t.rewardDetails)}</p>
 <div class="task-list">
   <p>Tasks:</p>
   <ul class="list-disc pl-5" style="word-wrap: break-word;">
@@ -822,8 +822,8 @@ ${t.mediaURI ? `<img src="${s}" alt="${t.projectName}" style="max-height: 200px;
   </ul>
 </div>
 <div>
-  <input id="proofUrl-${e}" class="proofUrl" placeholder="Submit proof URL" type="text">
-  <select id="taskSelect-${e}" class="taskSelect">
+  <input id="proofUrl-${e}" class="proofUrl" placeholder="Proof URL (link to your post or profile)" type="text" aria-label="Proof URL">
+  <select id="taskSelect-${e}" class="taskSelect" aria-label="Task this proof is for">
     ${a.map((e, t) => `<option value="${t}">${getTaskTypeName(e.taskType)}</option>`).join("")}
   </select>
   <button id="submitProof-${e}">Submit Proof</button>
@@ -849,7 +849,7 @@ function getTaskTypeName(e) {
 return ["Follow", "Share (Retweet)", "Like", "Link", "Comment", "Quote", "Tag Friends"][e] || "Unknown";
 }
 function copyToClipboard(e) {
-navigator.clipboard.writeText(e).then(() => alert("Copied to clipboard!"));
+navigator.clipboard.writeText(e).then(() => notify("Copied to clipboard.", "success"));
 }
 document.addEventListener("DOMContentLoaded", async () => {
 await initWeb3(), setupEventListeners();
@@ -858,7 +858,69 @@ let e = document.getElementById("howtoToggle"),
 e && t
   ? e.addEventListener("click", () => {
         let a = !t.classList.contains("active");
-        t.classList.toggle("active"), (e.textContent = `How To Use Shiller ${a ? "▲" : "▼"}   PulseChain is Slow sometimes. Allow 15-30 seconds for Leaderboad, Dashboard, and this "How To" bar to load.`);
+        t.classList.toggle("active"), e.setAttribute("aria-expanded", String(a)), (e.textContent = `How to use Shiller ${a ? "▲" : "▼"}`);
     })
   : console.error("How to elements not found:", { howtoToggle: e, howtoContent: t });
 });
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+// Campaign names, descriptions, rewards, task targets and proof URLs are written
+// to the chain by anyone, so they are escaped before being put into the page.
+function esc(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Only http(s) links are allowed in href/src; anything else becomes "#".
+function safeUrl(value) {
+  return /^https?:\/\//i.test(String(value || "").trim()) ? String(value).trim() : "#";
+}
+
+// Non-blocking message in place of alert(). type: "info" | "success" | "error"
+function notify(message, type = "info") {
+  let region = document.getElementById("toastRegion");
+  if (!region) {
+    region = document.createElement("div");
+    region.id = "toastRegion";
+    region.className = "toast-region";
+    region.setAttribute("role", "status");
+    region.setAttribute("aria-live", "polite");
+    document.body.appendChild(region);
+  }
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  region.appendChild(toast);
+  setTimeout(() => toast.remove(), type === "error" ? 9000 : 6000);
+}
+
+// Everyone who has taken part in a campaign: addresses the contract already
+// lists (added when a proof is approved) plus anyone who has submitted a proof
+// that is still pending, read from ProofSubmitted events.
+async function getCampaignParticipants(campaignId, startTime) {
+  const found = new Map();
+  const add = (address) => found.set(address.toLowerCase(), address);
+  (await shillerContract.methods.getParticipants(campaignId).call()).forEach(add);
+  try {
+    const latest = Number(await web3.eth.getBlockNumber());
+    // PulseChain blocks are about 10 seconds; look back to the campaign start plus a margin.
+    const age = Math.max(0, Math.floor(Date.now() / 1000) - Number(startTime));
+    const fromBlock = Math.max(0, latest - Math.ceil(age / 10) - 2000);
+    const events = await shillerContract.getPastEvents("ProofSubmitted", {
+      filter: { campaignId: String(campaignId) },
+      fromBlock,
+      toBlock: "latest",
+    });
+    events.forEach((event) => add(event.returnValues.participant));
+  } catch (error) {
+    console.warn("Could not read ProofSubmitted events; showing approved participants only.", error);
+  }
+  return [...found.values()];
+}

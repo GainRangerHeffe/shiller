@@ -2,109 +2,179 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Shiller</title>
-    <link rel="stylesheet" href="./style.css" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Shiller | Reward Campaigns for X on PulseChain</title>
+    <meta name="description" content="Shiller is a campaign app for crypto projects on PulseChain. Creators set X tasks and rewards, participants submit proof, and creators approve it on-chain.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#6A0DAD">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Shiller">
+    <meta property="og:title" content="Shiller | Reward Campaigns for X on PulseChain">
+    <meta property="og:description" content="Create X task campaigns for your project, or complete tasks and submit proof to earn rewards. Runs on PulseChain.">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@ShillerDapp">
+    <meta name="twitter:title" content="Shiller | Reward Campaigns for X on PulseChain">
+    <meta name="twitter:description" content="Create X task campaigns for your project, or complete tasks and submit proof to earn rewards. Runs on PulseChain.">
+
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Shiller",
+        "description": "A campaign app for crypto projects on PulseChain. Creators set X tasks and rewards, participants submit proof, and creators approve it on-chain.",
+        "applicationCategory": "SocialNetworkingApplication",
+        "operatingSystem": "Any (web browser with a PulseChain wallet)",
+        "codeRepository": "https://github.com/GainRangerHeffe/shiller",
+        "sameAs": ["https://x.com/ShillerDapp"],
+        "featureList": [
+            "Create a three-day campaign of X tasks for a USDC fee",
+            "Submit proof of completed tasks",
+            "Creator dashboard to approve proofs",
+            "Leaderboard of the most active campaigns"
+        ]
+    }
+    </script>
 </head>
 <body>
-    <div id="backdrop"></div>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div id="backdrop" aria-hidden="true"></div>
+
     <header>
         <div class="header-content">
-            <a href="https://www.x.com/ShillerDapp/" class="social-link">
-                <img src="images/x.jpg" style="height: 40px; vertical-align: middle;" onerror="this.style.display='none'" alt="X Social">
+            <a href="https://x.com/ShillerDapp" class="social-link" target="_blank" rel="noopener" aria-label="Shiller on X">
+                <img src="images/x.jpg" width="40" height="40" onerror="this.style.display='none'" alt="">
             </a>
-            <h1>Shiller</h1>
-            <p>Get rewards to Hype on X!</p>
+            <div class="brand">
+                <h1>Shiller</h1>
+                <p>Get rewards to hype on X!</p>
+            </div>
         </div>
-        <select id="chainSelector">
-            <option value="0x171">PulseChain</option>
-            <!-- <option value="0x2105">Base</option> --> <!-- Commented out -->
-            <!-- <option value="0x4da">Sonic</option> --> <!-- Commented out -->
-            <!-- <option value="0x38">BNB</option> --> <!-- Commented out -->
-        </select>
-        <button id="connectWallet">Connect Wallet</button>
+        <div class="header-actions">
+            <label for="chainSelector" class="visually-hidden">Network</label>
+            <select id="chainSelector">
+                <option value="0x171">PulseChain</option>
+                <!-- <option value="0x2105">Base</option> -->
+                <!-- <option value="0x4da">Sonic</option> -->
+                <!-- <option value="0x38">BNB</option> -->
+            </select>
+            <button id="connectWallet" type="button">Connect Wallet</button>
+        </div>
     </header>
-    <section id="howto">
-        <button id="howtoToggle" class="howto-toggle">How To Use Shiller ▼   PulseChain is Slow sometimes. Allow 15-30 seconds for Leaderboad, Dashboard, and this "How To" bar to load.</button>
-        <div id="howtoContent" class="howto-content">
-            <ul>
-                <li>✅Connect your wallet. Make sure you're on PulseChain network.</li>
-                <li>✨Creators: Create a campaign ($2 USDC). Add at least 3 tasks (first 3 included, $1 each extra after).</li>
-                <li>🎴Creators use their campaign ID to view and approve proofs in the dashboard.</li>
-                <li>If you get a failed receipt error, check your campaign IDs below or PulseScan.</li>
-                <li>
-                    <span id="usdcAddress" class="copyable"></span> - PLS USDC contract address
-                    <button id="copyUsdc" class="copy-btn">Copy</button>
-                </li>
-                <li>☑️Participants: Complete tasks via X links, submit proof URL for verification.</li>
-                <li>💵Earn rewards: Creators detail rewards (tokens, NFTs, etc.). Top campaigns show on the leaderboard!</li>
-                <li>**DYOR on projects. We are not responsible for unrewarded tasks or malicious tokens.</li>
-                <li>Any other questions? Message us on X and check out our example videos!</li>
-            </ul>
-        </div>
-    </section>
-    <div class="main-container">
-        <section id="filters">
-            <button class="filter-btn" data-filter="date" data-value="newest">Newest</button>
-            <button class="filter-btn" data-filter="date" data-value="oldest">Oldest</button>
-            <button class="filter-btn" data-filter="activity" data-value="mostActive">Most Active</button>
-            <input id="nameFilter" placeholder="Project Name" type="text">
-            <button id="searchBtn">Search</button>
+
+    <main id="main">
+        <section id="howto" aria-label="How to use Shiller">
+            <button id="howtoToggle" class="howto-toggle" type="button" aria-expanded="false" aria-controls="howtoContent">How to use Shiller ▼</button>
+            <p class="howto-note">PulseChain can be slow. Allow 15 to 30 seconds for campaigns, the leaderboard and the dashboard to load.</p>
+            <div id="howtoContent" class="howto-content">
+                <ul>
+                    <li>✅ Connect your wallet and make sure it is on the PulseChain network.</li>
+                    <li>✨ Creators: create a campaign for $2 USDC with at least 3 tasks. The first 3 tasks are included; each extra task is $1. A campaign runs for 3 days.</li>
+                    <li>🎴 Creators: use your campaign ID in the Creator Dashboard to view and approve proofs.</li>
+                    <li>If you get a failed receipt error, check your campaign IDs in the dashboard or on PulseScan.</li>
+                    <li>
+                        USDC contract address on PulseChain:
+                        <span id="usdcAddress" class="copyable"></span>
+                        <button id="copyUsdc" class="copy-btn" type="button">Copy</button>
+                    </li>
+                    <li>☑️ Participants: complete tasks through the X links, then submit a proof URL for the creator to verify.</li>
+                    <li>💵 Rewards: each creator says what they pay out (tokens, NFTs and so on). Shiller does not hold or send rewards. The most active campaigns show on the leaderboard.</li>
+                    <li>⚠️ Do your own research on every project. Shiller is not responsible for unpaid rewards or malicious tokens.</li>
+                    <li>Other questions? Message <a href="https://x.com/ShillerDapp" target="_blank" rel="noopener">@ShillerDapp</a> on X.</li>
+                </ul>
+            </div>
         </section>
-        <section id="campaigns">
-            <h2>Campaigns</h2>
-            <div id="campaignList"></div>
-            <div id="pagination"></div>
-        </section>
-        <div class="top-row">
-            <section id="leaderboard">
-                <h2>Leaderboard</h2>
-                <div id="leaderboardList"></div>
+
+        <div class="main-container">
+            <section id="filters" aria-label="Find campaigns">
+                <button class="filter-btn" type="button" data-filter="date" data-value="newest">Newest</button>
+                <button class="filter-btn" type="button" data-filter="date" data-value="oldest">Oldest</button>
+                <button class="filter-btn" type="button" data-filter="activity" data-value="mostActive">Most Active</button>
+                <label for="nameFilter" class="visually-hidden">Project name</label>
+                <input id="nameFilter" placeholder="Project name" type="text">
+                <button id="searchBtn" type="button">Search</button>
             </section>
-            <aside id="create">
-                <h2>Create Campaign</h2>
-                <input id="projectName" placeholder="Project Name" type="text">
-                <input id="description" placeholder="Description: Bio, Websites, TG" type="text">
-                <label for="mediaFile">Upload Image to IPFS (Max 5MB, Images Only):</label>
-                <input id="mediaFile" type="file" accept="image/*">
-                <div id="imagePreview" style="margin-top: 10px;"></div>
-                <div id="ipfsStatus" style="color: #FFD700; margin-top: 5px;"></div>
-                <input id="rewardDetails" placeholder="Reward Details: What users get per task or overall" type="text">
-                <div id="taskList">
-                    <h3>Tasks</h3>
-                    <div class="task-entry">
-                        <select class="taskType">
-                            <option value="0">Follow</option>
-                            <option value="1">Share (Retweet)</option>
-                            <option value="2">Like</option>
-                            <option value="3">Link</option>
-                            <option value="4">Comment</option>
-                            <option value="5">Quote</option>
-                            <option value="6">Tag Friends</option>
-                        </select>
-                        <input class="taskTarget" placeholder="Target (e.g., @user or Tweet link)" type="text">
-                        <button class="removeTask">Remove</button>
-                        <span class="taskCost">Included</span>
+
+            <section id="campaigns" aria-labelledby="campaignsTitle">
+                <h2 id="campaignsTitle">Campaigns</h2>
+                <div id="campaignList" data-empty="Connect your wallet to load campaigns."></div>
+                <div id="pagination"></div>
+            </section>
+
+            <div class="top-row">
+                <section id="leaderboard" aria-labelledby="leaderboardTitle">
+                    <h2 id="leaderboardTitle">Leaderboard</h2>
+                    <div id="leaderboardList" data-empty="Connect your wallet to load the leaderboard."></div>
+                </section>
+
+                <aside id="create" aria-labelledby="createTitle">
+                    <h2 id="createTitle">Create Campaign</h2>
+
+                    <label for="projectName">Project name</label>
+                    <input id="projectName" type="text" autocomplete="off">
+
+                    <label for="description">Description</label>
+                    <input id="description" placeholder="Bio, website, Telegram" type="text" autocomplete="off">
+
+                    <label for="mediaFile">Campaign image <span class="hint">(optional, images only, max 5 MB, stored on IPFS)</span></label>
+                    <input id="mediaFile" type="file" accept="image/*">
+                    <div id="imagePreview"></div>
+                    <div id="ipfsStatus" class="status-text" role="status"></div>
+
+                    <label for="rewardDetails">Reward details</label>
+                    <input id="rewardDetails" placeholder="What users get per task or overall" type="text" autocomplete="off">
+
+                    <div id="taskList">
+                        <h3>Tasks</h3>
+                        <div class="task-entry">
+                            <select class="taskType" aria-label="Task type">
+                                <option value="0">Follow</option>
+                                <option value="1">Share (Retweet)</option>
+                                <option value="2">Like</option>
+                                <option value="3">Link</option>
+                                <option value="4">Comment</option>
+                                <option value="5">Quote</option>
+                                <option value="6">Tag Friends</option>
+                            </select>
+                            <input class="taskTarget" placeholder="Target (e.g., @user or Tweet link)" type="text" aria-label="Task target">
+                            <button class="removeTask" type="button">Remove</button>
+                            <span class="taskCost">Included</span>
+                        </div>
                     </div>
+
+                    <div class="create-actions">
+                        <button id="addTask" type="button">Add Another Task</button>
+                        <button id="approveUSDC" type="button">Approve USDC</button>
+                        <button id="createCampaign" type="button">Create Campaign</button>
+                    </div>
+                    <div id="campaignIdDisplay" class="status-text" role="status"></div>
+                </aside>
+            </div>
+
+            <section id="dashboard" aria-labelledby="dashboardTitle">
+                <h2 id="dashboardTitle">Creator Dashboard</h2>
+                <div id="userCampaigns" class="status-text"></div>
+                <div class="dashboard-controls">
+                    <label for="campaignId" class="visually-hidden">Campaign ID</label>
+                    <input id="campaignId" placeholder="Campaign ID" type="number" min="0">
+                    <button id="loadDashboard" type="button">Load Dashboard</button>
+                    <button id="batchApprove" type="button">Approve Selected</button>
+                    <button id="endCampaign" type="button" class="danger">End Campaign</button>
                 </div>
-                <button id="addTask">Add Another Task</button>
-                <button id="approveUSDC">Approve USDC</button>
-                <button id="createCampaign">Create Campaign</button>
-                <div id="campaignIdDisplay" style="margin-top: 10px; color: #FFD700;"></div>
-            </aside>
+                <div id="dashboardList"></div>
+            </section>
         </div>
-        <section id="dashboard">
-            <h2>Creator Dashboard</h2>
-            <div id="userCampaigns" style="margin-bottom: 10px; color: #FFD700;"></div>
-            <input id="campaignId" placeholder="Enter Campaign ID" type="number">
-            <button id="loadDashboard">Load Dashboard</button>
-            <button id="endCampaign">End Campaign</button>
-            <button id="batchApprove">Approve Selected</button>
-            <div id="dashboardList"></div>
-        </section>
-    </div>
-    <footer>Dapp Made by @GainRangerHeffe : Website ran by @ShillerDapp</footer>
+    </main>
+
+    <footer>
+        Dapp made by <a href="https://github.com/GainRangerHeffe" target="_blank" rel="noopener">@GainRangerHeffe</a>. Site run by <a href="https://x.com/ShillerDapp" target="_blank" rel="noopener">@ShillerDapp</a>.
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-    <script src="script.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
